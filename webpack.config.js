@@ -4,13 +4,24 @@ const HTMLWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const isProd = process.env.NODE_ENV === 'production';
+const isDev = !isProd 
+// cross-env опр-ет ОС и в зав от нее задает перем окр
+
+const filename = ext => isDev ? `bundle.${ext}` : `bundle.[hash].${ext}`
+  
 module.exports = {
   context: path.resolve(__dirname, "src"),
   mode: "development",
   entry: "./index.js",
   output: {
-    filename: "bundle.[hash].js",
+    filename: filename('js'),
     path: path.resolve(__dirname, "dist"),
+  },
+  devtool: isDev ? 'source-map' : false,
+  devServer: {
+    port: 3000,
+    hot: isDev
   },
   resolve: {
       extensions: ['.js'],
@@ -23,9 +34,13 @@ module.exports = {
     new CleanWebpackPlugin(),
     new HTMLWebpackPlugin({
       template: "index.html",
+      minify: {
+        removeComments: isProd,
+        collapseWhitespace: isProd
+      }
     }),
     new MiniCssExtractPlugin({
-        filename: 'bundle.[hash].css'
+        filename: filename('css')
     }),
   ],
   module: {
