@@ -1,3 +1,3 @@
 import './module'
 import './scss/index.scss'
-console.log(11);
+console.log(11)
