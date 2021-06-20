@@ -2,34 +2,36 @@ const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { web } = require("webpack");
 
-const isProd = process.env.NODE_ENV === 'production';
-const isDev = !isProd 
+const isProd = process.env.NODE_ENV === "production";
+const isDev = !isProd;
 // cross-env опр-ет ОС и в зав от нее задает перем окр
 
-const filename = ext => isDev ? `bundle.${ext}` : `bundle.[hash].${ext}`
-  
+const filename = (ext) => (isDev ? `bundle.${ext}` : `bundle.[hash].${ext}`);
+
 module.exports = {
   context: path.resolve(__dirname, "src"),
   mode: "development",
-  entry: "./index.js",
+  entry: ["@babel/polyfill", "./index"],
   output: {
-    filename: filename('js'),
+    filename: filename("js"),
     path: path.resolve(__dirname, "dist"),
   },
-  devtool: isDev ? 'source-map' : false,
+  devtool: isDev ? "source-map" : false,
+  target: process.env.NODE_ENV === "development" ? "web" : "browserslist",
   devServer: {
     port: 3000,
     hot: isDev,
     // open: true
   },
   resolve: {
-      extensions: ['.js'],
-      alias: {
-          '@': path.resolve(__dirname, "src"),
-          '@core': path.resolve(__dirname, "src/core"),
-      }
+    extensions: [".js"],
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@core": path.resolve(__dirname, "src/core"),
+    },
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -37,11 +39,11 @@ module.exports = {
       template: "index.html",
       minify: {
         removeComments: isProd,
-        collapseWhitespace: isProd
-      }
+        collapseWhitespace: isProd,
+      },
     }),
     new MiniCssExtractPlugin({
-        filename: filename('css')
+      filename: filename("css"),
     }),
   ],
   module: {
@@ -49,7 +51,10 @@ module.exports = {
       {
         test: /\.s[ac]ss$/i,
         use: [
-            MiniCssExtractPlugin.loader,
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {},
+          },
           "css-loader",
           "sass-loader",
         ],
@@ -60,9 +65,9 @@ module.exports = {
         use: {
           loader: "babel-loader",
           options: {
-            presets: ['@babel/preset-env']
-          }
-        }
+            presets: ["@babel/preset-env"],
+          },
+        },
       },
     ],
   },
